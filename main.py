@@ -9,6 +9,8 @@ pygame.init()
 font = pygame.font.SysFont('Droid Sans Monospace', 30)
 vec = pygame.math.Vector2
 
+
+BG_COLOR = (50, 50, 50)
 ACC = 0.5
 FRIC = -0.02
 FPS = 60
@@ -21,16 +23,19 @@ FramesPerSecond = pygame.time.Clock()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption('Poki')
 class Player(pygame.sprite.Sprite):
+    
     def __init__(self):
         super(Player, self).__init__()
         self.surf = pygame.Surface((75, 75))
-        self.surf.fill((0, 0, 0))
+        self.surf.fill((0, 204, 0))
         self.rect = self.surf.get_rect(center=(10, 385))
         
         self.pos = vec((10, 385))
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
+        idle_sprite = pygame.image.load('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Idle.png').convert_alpha()
     
+
     def move(self):
         pressed_keys = pygame.key.get_pressed()
         
@@ -100,9 +105,9 @@ while running:
             if event.key == K_ESCAPE:
                 running = False   
 
-    screen.fill((255, 255, 255))
+    screen.fill(BG_COLOR)
 
-    text = font.render(player.data() + f" FRIC:{format(FRIC, '.3f')}", False, (0, 178, 0))
+    text = font.render(player.data(), False, (0, 178, 0))
 
     player.update()
 

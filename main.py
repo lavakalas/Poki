@@ -30,6 +30,8 @@ class Player(pygame.sprite.Sprite):
         self.surf.fill((0, 204, 0))
         self.rect = self.surf.get_rect(center=(10, 385))
         
+        self.STATE = 'idle'  # idle run jump midJump fall
+
         self.pos = vec((10, 385))
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
@@ -72,6 +74,9 @@ class Player(pygame.sprite.Sprite):
             self.vel.y -= 15
     def data(self):
         return f"X:{format(self.pos.x, '.2f')} Y:{format(self.pos.y, '.2f')} Xvel:{format(self.vel.x, '.2f')} Yvel:{format(self.vel.y, '.2f')}"
+    
+    def render(self):
+        screen.blit(self.surf, self.rect)
         
 
 class Platform(pygame.sprite.Sprite):
@@ -89,7 +94,6 @@ running = True
 
 
 sprites = pygame.sprite.Group()
-sprites.add(player)
 sprites.add(ground)
 
 platforms = pygame.sprite.Group()
@@ -114,7 +118,8 @@ while running:
 
     for entity in sprites:
         screen.blit(entity.surf, entity.rect)
-        entity.move()
+    player.move()
+    player.render()
 
     screen.blit(text, (0, 0))
 

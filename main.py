@@ -12,9 +12,9 @@ vec = pygame.math.Vector2
 
 
 
-BG_COLOR = (50, 50, 50)
+BG_COLOR = (255, 255, 255)
 ACC = 0.5
-FRIC = -0.02
+FRIC = -0.04
 FPS = 60
 
 SCREEN_WIDTH = 800
@@ -43,7 +43,6 @@ class SpriteSheet(object):
 
         image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
  
-        #image.set_colorkey((0, 0, 0))
 
         return image
  
@@ -77,20 +76,22 @@ class Player(pygame.sprite.Sprite):
         pressed_keys = pygame.key.get_pressed()
         
         self.acc = vec(0, 0.5)
-
+        if self.STATE != 'jump' and self.STATE != 'fall':
+                self.STATE = 'idle'
         if pressed_keys[K_LEFT]:
             self.acc.x = -ACC
             self.direction = 0
-            if self.STATE != 'jump':
+            if self.STATE != 'jump' and self.STATE != 'fall':
                 self.STATE = 'run'
         if pressed_keys[K_RIGHT]:
             self.acc.x = ACC
             self.direction = 1
-            if self.STATE != 'jump':
+            if self.STATE != 'jump' and self.STATE != 'fall':
                 self.STATE = 'run'
         if pressed_keys[K_SPACE]:
             self.jump()
             self.STATE = 'jump'
+    
         
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc

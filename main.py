@@ -55,15 +55,21 @@ class Player(pygame.sprite.Sprite):
         self.surf = pygame.Surface((120, 80))
         #self.surf.fill((0, 204, 0))
         
-        self.STATE = 'idle'  # idle run jump midJump fall
+        self.STATE = 'idle'  # idle run jump fall
 
+        
+        self.direction = 1 # 1 for right 0 for left
+        self.frames = 10 # most common amount of frames for animations, starting with idle
         self.animation_frame = 0
         self.pos = vec((10, 385))
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.rect = self.surf.get_rect(center=(10, 485))
-        self.spritesheets = [SpriteSheet('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Idle.png'), SpriteSheet('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Run.png')]
-        self.image = self.spritesheets[0].get_image(120 * self.animation_frame, 0, 120, 80)
+        self.spritesheets = [[SpriteSheet('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Idle.png'), 10], 
+        [SpriteSheet('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Run.png'), 10], 
+        [SpriteSheet('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Jump.png'), 3],
+        [SpriteSheet('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Fall.png'), 3]]
+        self.image = self.spritesheets[0][0].get_image(120 * self.animation_frame, 0, 120, 80)
         self.surf.blit(self.image, self.image.get_rect())
     
 
@@ -74,10 +80,14 @@ class Player(pygame.sprite.Sprite):
 
         if pressed_keys[K_LEFT]:
             self.acc.x = -ACC
-            self.STATE = 'run'
+            self.direction = 0
+            if self.STATE != 'jump':
+                self.STATE = 'run'
         if pressed_keys[K_RIGHT]:
             self.acc.x = ACC
-            self.STATE = 'run'
+            self.direction = 1
+            if self.STATE != 'jump':
+                self.STATE = 'run'
         if pressed_keys[K_SPACE]:
             self.jump()
             self.STATE = 'jump'
@@ -91,6 +101,9 @@ class Player(pygame.sprite.Sprite):
             self.pos.x = 0
         if self.pos.x < 0:
             self.pos.x = SCREEN_WIDTH
+        
+        if self.STATE == 'jump' and self.vel.y > 0:
+            self.STATE = 'fall'
 
         self.rect.midbottom = self.pos
     
@@ -99,11 +112,25 @@ class Player(pygame.sprite.Sprite):
         if collide:
             self.pos.y = collide[0].rect.top + 1
             self.vel.y = 0
-        self.animation_frame = (self.animation_frame + 1) % 10
+            if self.STATE == 'jump' or self.STATE == 'fall':
+                self.STATE = 'idle'
+    def animate(self):
         if self.STATE == 'idle':
-            self.image = self.spritesheets[0].get_image(120 * self.animation_frame, 0, 120, 80)
+            self.image = self.spritesheets[0][0].get_image(120 * self.animation_frame, 0, 120, 80)
+            self.frames = self.spritesheets[0][1]
         if self.STATE == 'run':
-            self.image = self.spritesheets[1].get_image(120 * self.animation_frame, 0, 120, 80)
+            self.image = self.spritesheets[1][0].get_image(120 * self.animation_frame, 0, 120, 80)
+            self.frames = self.spritesheets[1][1]
+        if self.STATE == 'jump':
+            self.image = self.spritesheets[2][0].get_image(120 * self.animation_frame, 0, 120, 80)
+            self.frames = self.spritesheets[2][1]
+        if self.STATE == 'fall':
+            self.image = self.spritesheets[3][0].get_image(120 * self.animation_frame, 0, 120, 80)
+            self.frames = self.spritesheets[3][1]
+        self.animation_frame = (self.animation_frame + 1) % self.frames
+
+        if self.direction == 0:
+                self.image = pygame.transform.flip(self.image, True, False)
         self.surf.blit(self.image, self.image.get_rect())
     
     def jump(self):
@@ -154,6 +181,7 @@ while running:
     text = font.render(player.data(), False, (0, 178, 0))
 
     player.update()
+    player.animate()
 
 
     for entity in sprites:
@@ -162,6 +190,7 @@ while running:
 
     screen.blit(text, (0, 0))
 
+    print(player.STATE)
     pygame.display.update()
 
     FramesPerSecond.tick(FPS)

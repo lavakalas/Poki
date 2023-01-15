@@ -1,13 +1,15 @@
 import pygame
 from pygame.locals import *
 
-
+import constants
 
 
 pygame.init()
                    
 font = pygame.font.SysFont('Droid Sans Monospace', 30)
 vec = pygame.math.Vector2
+
+
 
 
 BG_COLOR = (50, 50, 50)
@@ -21,21 +23,48 @@ SCREEN_HEIGHT = 600
 FramesPerSecond = pygame.time.Clock()
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+
+
 pygame.display.set_caption('Poki')
+
+
+ 
+class SpriteSheet(object):
+ 
+    def __init__(self, file_name):
+ 
+        self.sprite_sheet = pygame.image.load(file_name).convert_alpha()
+ 
+ 
+    def get_image(self, x, y, width, height):
+
+        image = pygame.Surface((width, height)).convert_alpha()
+
+
+        image.blit(self.sprite_sheet, (0, 0), (x, y, width, height))
+ 
+        #image.set_colorkey((0, 0, 0))
+
+        return image
+ 
+
 class Player(pygame.sprite.Sprite):
     
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.Surface((75, 75))
-        self.surf.fill((0, 204, 0))
-        self.rect = self.surf.get_rect(center=(10, 385))
+        self.surf = pygame.Surface((120, 80))
+        #self.surf.fill((0, 204, 0))
         
         self.STATE = 'idle'  # idle run jump midJump fall
 
+        self.animation_frame = 0
         self.pos = vec((10, 385))
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
-        idle_sprite = pygame.image.load('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Idle.png').convert_alpha()
+        self.rect = self.surf.get_rect(center=(10, 485))
+        self.spritesheets = [SpriteSheet('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Idle.png'), SpriteSheet('asstes/knight/Colour1/NoOutline/120x80_PNGSheets/_Run.png')]
+        self.image = self.spritesheets[0].get_image(120 * self.animation_frame, 0, 120, 80)
+        self.surf.blit(self.image, self.image.get_rect())
     
 
     def move(self):
@@ -45,10 +74,13 @@ class Player(pygame.sprite.Sprite):
 
         if pressed_keys[K_LEFT]:
             self.acc.x = -ACC
+            self.STATE = 'run'
         if pressed_keys[K_RIGHT]:
             self.acc.x = ACC
+            self.STATE = 'run'
         if pressed_keys[K_SPACE]:
             self.jump()
+            self.STATE = 'jump'
         
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc
@@ -67,6 +99,12 @@ class Player(pygame.sprite.Sprite):
         if collide:
             self.pos.y = collide[0].rect.top + 1
             self.vel.y = 0
+        self.animation_frame = (self.animation_frame + 1) % 10
+        if self.STATE == 'idle':
+            self.image = self.spritesheets[0].get_image(120 * self.animation_frame, 0, 120, 80)
+        if self.STATE == 'run':
+            self.image = self.spritesheets[1].get_image(120 * self.animation_frame, 0, 120, 80)
+        self.surf.blit(self.image, self.image.get_rect())
     
     def jump(self):
         collide = pygame.sprite.spritecollide(player, platforms, False)
@@ -76,7 +114,8 @@ class Player(pygame.sprite.Sprite):
         return f"X:{format(self.pos.x, '.2f')} Y:{format(self.pos.y, '.2f')} Xvel:{format(self.vel.x, '.2f')} Yvel:{format(self.vel.y, '.2f')}"
     
     def render(self):
-        screen.blit(self.surf, self.rect)
+        self.image = self.spritesheet.get_image(0, 0, 120, 80)
+        self.rect = self.image.get_rect()
         
 
 class Platform(pygame.sprite.Sprite):
@@ -95,6 +134,7 @@ running = True
 
 sprites = pygame.sprite.Group()
 sprites.add(ground)
+sprites.add(player)
 
 platforms = pygame.sprite.Group()
 platforms.add(ground)
@@ -118,8 +158,7 @@ while running:
 
     for entity in sprites:
         screen.blit(entity.surf, entity.rect)
-    player.move()
-    player.render()
+        entity.move()
 
     screen.blit(text, (0, 0))
 

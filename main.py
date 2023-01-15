@@ -91,7 +91,6 @@ class Player(pygame.sprite.Sprite):
         if pressed_keys[K_SPACE]:
             self.jump()
             self.STATE = 'jump'
-    
         
         self.acc.x += self.vel.x * FRIC
         self.vel += self.acc
@@ -140,10 +139,6 @@ class Player(pygame.sprite.Sprite):
             self.vel.y -= 15
     def data(self):
         return f"X:{format(self.pos.x, '.2f')} Y:{format(self.pos.y, '.2f')} Xvel:{format(self.vel.x, '.2f')} Yvel:{format(self.vel.y, '.2f')}"
-    
-    def render(self):
-        self.image = self.spritesheet.get_image(0, 0, 120, 80)
-        self.rect = self.image.get_rect()
         
 
 class Platform(pygame.sprite.Sprite):

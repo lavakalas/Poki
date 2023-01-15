@@ -51,13 +51,15 @@ class Player(pygame.sprite.Sprite):
     
     def __init__(self):
         super(Player, self).__init__()
-        self.surf = pygame.Surface((120, 80))
+        self.surf = pygame.Surface((180, 120))
         #self.surf.fill((0, 204, 0))
         
         self.STATE = 'idle'  # idle run jump fall
 
         
         self.direction = 1 # 1 for right 0 for left
+        self.animation_delay = 4
+        self.delay_counter = 0
         self.frames = 10 # most common amount of frames for animations, starting with idle
         self.animation_frame = 0
         self.pos = vec((10, 385))
@@ -72,6 +74,7 @@ class Player(pygame.sprite.Sprite):
         self.surf.blit(self.image, self.image.get_rect())
     
 
+    
     def move(self):
         pressed_keys = pygame.key.get_pressed()
         
@@ -115,6 +118,7 @@ class Player(pygame.sprite.Sprite):
             if self.STATE == 'jump' or self.STATE == 'fall':
                 self.STATE = 'idle'
     def animate(self):
+        
         if self.STATE == 'idle':
             self.image = self.spritesheets[0][0].get_image(120 * self.animation_frame, 0, 120, 80)
             self.frames = self.spritesheets[0][1]
@@ -127,11 +131,18 @@ class Player(pygame.sprite.Sprite):
         if self.STATE == 'fall':
             self.image = self.spritesheets[3][0].get_image(120 * self.animation_frame, 0, 120, 80)
             self.frames = self.spritesheets[3][1]
-        self.animation_frame = (self.animation_frame + 1) % self.frames
+        
+        self.delay_counter += 1
+
+        if self.delay_counter == self.animation_delay:
+            self.delay_counter = 0
+            self.animation_frame = (self.animation_frame + 1) % self.frames
 
         if self.direction == 0:
-                self.image = pygame.transform.flip(self.image, True, False)
+            self.image = pygame.transform.flip(self.image, True, False)
+        self.image = pygame.transform.scale(self.image, (180, 120))
         self.surf.blit(self.image, self.image.get_rect())
+        self.surf.set_colorkey((0,0,0))
     
     def jump(self):
         collide = pygame.sprite.spritecollide(player, platforms, False)

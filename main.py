@@ -148,6 +148,7 @@ class Player(pygame.sprite.Sprite):
         collide = pygame.sprite.spritecollide(player, platforms, False)
         if collide:
             self.vel.y -= 15
+            self.animation_frame = 0
     def data(self):
         return f"X:{format(self.pos.x, '.2f')} Y:{format(self.pos.y, '.2f')} Xvel:{format(self.vel.x, '.2f')} Yvel:{format(self.vel.y, '.2f')}"
         

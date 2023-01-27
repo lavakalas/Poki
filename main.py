@@ -1,8 +1,6 @@
 import pygame
 from pygame.locals import *
 
-import constants
-
 
 pygame.init()
                    
